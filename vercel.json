@@ -1,8 +1,13 @@
 {
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://researchsocial-backend-production.up.railway.app/api/:path*"
-    }
+    { "source": "/api/:path*", "destination": "https://researchsocial-backend-production.up.railway.app/api/:path*" },
+    { "source": "/messages", "destination": "/messages.html" },
+    { "source": "/network", "destination": "/network.html" },
+    { "source": "/notifications", "destination": "/notifications.html" },
+    { "source": "/library", "destination": "/library.html" },
+    { "source": "/search", "destination": "/search.html" },
+    { "source": "/post/:path*", "destination": "/post.html" },
+    { "source": "/profile/:path*", "destination": "/profile.html" },
+    { "source": "/admin", "destination": "/admin/index.html" }
   ]
 }
