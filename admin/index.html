@@ -505,7 +505,7 @@ canvas{max-height:220px;}
 
 <script>
 const API = '/api';
-let TOKEN = localStorage.getItem('rs_admin_token');
+let TOKEN = localStorage.getItem('rs_admin_token') || localStorage.getItem('rs_access_token');
 let ME = null;
 let socket = null;
 let charts = {};
