@@ -190,6 +190,14 @@ canvas{max-height:220px;}
   .sidebar{display:none;}
   .stats-grid{grid-template-columns:repeat(2,1fr);}
   .charts-grid{grid-template-columns:1fr;}
+  .topbar-right{flex-wrap:wrap;gap:6px;}
+  .topbar-user span{display:none;}
+  .btn-topbar{padding:5px 10px;font-size:11px;}
+}
+@media(max-width:600px){
+  .topbar{padding:0 12px;}
+  .topbar-logo span{display:none;}
+  .topbar-right a[href="/"]{display:none;}
 }
 </style>
 </head>
@@ -603,7 +611,7 @@ async function checkAuth() {
 
 function showLogin() {
   document.getElementById('loginPage').style.display = 'block';
-  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.removeProperty('display'); });
   document.querySelector('.sidebar').style.display = 'none';
 }
 
@@ -620,6 +628,7 @@ function logout() {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 function bootAdmin() {
   document.getElementById('loginPage').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.style.removeProperty('display'));
   document.querySelector('.sidebar').style.display = '';
   document.getElementById('topbarAvatar').innerHTML = `<svg width="28" height="28" viewBox="0 0 28 28"><rect width="28" height="28" rx="14" fill="${ME.color||'#818cf8'}"/><text x="14" y="19" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Inter,sans-serif">${ME.initials||'A'}</text></svg>`;
   document.getElementById('topbarHandle').textContent = '@' + ME.handle;
