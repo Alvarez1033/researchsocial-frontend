@@ -269,6 +269,11 @@ canvas{max-height:220px;}
     Tags & Categories
   </button>
 
+  <button class="nav-link" data-page="roles" onclick="nav('roles',this)">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Roles
+  </button>
+
   <div class="nav-section">System</div>
   <button class="nav-link" data-page="settings" onclick="nav('settings',this)">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -433,6 +438,38 @@ canvas{max-height:220px;}
   </div>
 
   <!-- ── SETTINGS ── -->
+  <div id="page-roles" class="page">
+    <h1 class="page-title">Roles</h1>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <p style="font-size:13px;color:var(--muted)">Create and manage user roles. Click a role to edit it.</p>
+      <button class="btn btn-primary" onclick="openRoleEditor()">+ New Role</button>
+    </div>
+    <div id="rolesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
+    <!-- Role Editor Modal -->
+    <div id="roleModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto">
+        <h2 style="font-size:16px;font-weight:700;margin-bottom:16px" id="roleModalTitle">New Role</h2>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Role Name</label><input class="form-input" id="roleName" placeholder="e.g. Moderator"></div>
+          <div><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Display Label</label><input class="form-input" id="roleLabel" placeholder="e.g. Mod"></div>
+          <div style="display:flex;gap:12px">
+            <div style="flex:1"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Color</label><input class="form-input" id="roleColor" type="color" value="#818cf8"></div>
+            <div style="flex:1"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Level (0-10)</label><input class="form-input" id="roleLevel" type="number" min="0" max="10" value="1"></div>
+          </div>
+          <div><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Description</label><textarea class="form-input" id="roleDesc" rows="2" placeholder="What can this role do?"></textarea></div>
+          <div><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:8px">Permissions</label>
+            <div id="rolePerms" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveRole()">Save Role</button>
+          <button class="btn" style="flex:1;border:1px solid var(--border);color:var(--muted)" onclick="closeRoleModal()">Cancel</button>
+        </div>
+        <button id="deleteRoleBtn" style="display:none;width:100%;margin-top:8px;padding:8px;background:transparent;color:var(--error);border:1px solid var(--error);border-radius:var(--r-md);font-size:12px;font-weight:600;cursor:pointer" onclick="deleteRole()">Delete This Role</button>
+      </div>
+    </div>
+  </div>
+
   <div id="page-settings" class="page">
     <h1 class="page-title">Site Settings</h1>
     <div id="settingsList" style="display:grid;gap:16px;max-width:700px;"></div>
@@ -667,6 +704,7 @@ function nav(page, btn) {
     case 'settings': loadSettings(); break;
     case 'adminchat': loadAdminChat(); break;
     case 'attachments': loadAttachments(); break;
+    case 'roles': loadRoles(); break;
   }
 }
 
@@ -1164,6 +1202,115 @@ async function showRoleHistory(userId) {
     document.getElementById('userModalBody').insertAdjacentHTML('beforeend',
       `<div style="margin-top:16px;"><div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;">Role History</div>${html}</div>`);
   } catch(e) { showToast('Failed: ' + e.message, true); }
+}
+
+// ─── Roles Management ─────────────────────────────────────────────────────────
+const ALL_PERMISSIONS = [
+  'post.create','post.edit.own','post.edit.any','post.delete.own','post.delete.any','post.pin','post.feature','post.approve',
+  'comment.create','comment.delete.own','comment.delete.any',
+  'mod.flag.review','mod.remove','mod.ban','mod.warn',
+  'users.view','users.edit','users.roles.assign',
+  'admin.panel','admin.settings','admin.stats',
+  'support.tickets','support.respond'
+];
+
+let rolesData = JSON.parse(localStorage.getItem('rs_roles') || '[]');
+if (!rolesData.length) {
+  rolesData = [
+    { id:'user', name:'User', label:'User', color:'#8b949e', level:0, description:'Default role for all registered users.', permissions:['post.create','post.edit.own','post.delete.own','comment.create','comment.delete.own'], protected:true },
+    { id:'moderator', name:'Moderator', label:'Mod', color:'#fbbf24', level:5, description:'Can review flagged content, remove posts, and warn/ban users.', permissions:['post.create','post.edit.own','post.edit.any','post.delete.own','post.delete.any','post.pin','post.approve','comment.create','comment.delete.own','comment.delete.any','mod.flag.review','mod.remove','mod.ban','mod.warn','users.view','admin.panel','admin.stats'], protected:true },
+    { id:'admin', name:'Admin', label:'Admin', color:'#60a5fa', level:8, description:'Full administrative access.', permissions:ALL_PERMISSIONS.slice(), protected:true },
+    { id:'superadmin', name:'Super Admin', label:'Super Admin', color:'#f87171', level:10, description:'Unrestricted access. Cannot be modified.', permissions:ALL_PERMISSIONS.slice(), protected:true },
+  ];
+  localStorage.setItem('rs_roles', JSON.stringify(rolesData));
+}
+let editingRoleId = null;
+
+function loadRoles() {
+  const el = document.getElementById('rolesList');
+  el.innerHTML = rolesData.sort((a,b) => a.level - b.level).map(r => `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xl);padding:16px;cursor:pointer;transition:all var(--trans)" onclick="openRoleEditor('${r.id}')" onmouseover="this.style.borderColor='${r.color}'" onmouseout="this.style.borderColor=''">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:12px;height:12px;border-radius:50%;background:${r.color}"></div>
+        <span style="font-weight:700;font-size:14px">${esc(r.name)}</span>
+        <span style="font-size:11px;padding:2px 8px;border-radius:99px;background:${r.color}22;color:${r.color};font-weight:600">${esc(r.label)}</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:auto">Level ${r.level}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${esc(r.description||'')}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        ${r.permissions.slice(0,6).map(p => `<span style="font-size:10px;padding:2px 6px;border-radius:99px;background:var(--surface3);color:var(--muted)">${p}</span>`).join('')}
+        ${r.permissions.length > 6 ? `<span style="font-size:10px;padding:2px 6px;border-radius:99px;background:var(--surface3);color:var(--muted)">+${r.permissions.length-6} more</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function openRoleEditor(id) {
+  editingRoleId = id || null;
+  const modal = document.getElementById('roleModal');
+  modal.style.display = 'flex';
+  const role = id ? rolesData.find(r => r.id === id) : null;
+  document.getElementById('roleModalTitle').textContent = role ? 'Edit Role: ' + role.name : 'New Role';
+  document.getElementById('roleName').value = role ? role.name : '';
+  document.getElementById('roleLabel').value = role ? role.label : '';
+  document.getElementById('roleColor').value = role ? role.color : '#818cf8';
+  document.getElementById('roleLevel').value = role ? role.level : 1;
+  document.getElementById('roleDesc').value = role ? (role.description||'') : '';
+  const permsEl = document.getElementById('rolePerms');
+  const activePerms = role ? role.permissions : [];
+  permsEl.innerHTML = ALL_PERMISSIONS.map(p => `
+    <label style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;background:var(--surface3)">
+      <input type="checkbox" value="${p}" ${activePerms.includes(p)?'checked':''}>
+      <span>${p}</span>
+    </label>
+  `).join('');
+  const delBtn = document.getElementById('deleteRoleBtn');
+  delBtn.style.display = (role && !role.protected) ? 'block' : 'none';
+  // Disable fields for protected roles
+  const isProtected = role && role.protected;
+  document.getElementById('roleName').disabled = isProtected;
+  document.getElementById('roleLevel').disabled = isProtected;
+}
+
+function closeRoleModal() {
+  document.getElementById('roleModal').style.display = 'none';
+  editingRoleId = null;
+}
+
+function saveRole() {
+  const name = document.getElementById('roleName').value.trim();
+  const label = document.getElementById('roleLabel').value.trim() || name;
+  const color = document.getElementById('roleColor').value;
+  const level = parseInt(document.getElementById('roleLevel').value) || 1;
+  const desc = document.getElementById('roleDesc').value.trim();
+  const perms = [...document.querySelectorAll('#rolePerms input:checked')].map(c => c.value);
+  if (!name) { showToast('Role name is required', true); return; }
+  if (editingRoleId) {
+    const role = rolesData.find(r => r.id === editingRoleId);
+    if (role) {
+      if (!role.protected) { role.name = name; role.level = level; }
+      role.label = label; role.color = color; role.description = desc; role.permissions = perms;
+    }
+  } else {
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+    if (rolesData.find(r => r.id === id)) { showToast('Role already exists', true); return; }
+    rolesData.push({ id, name, label, color, level, description:desc, permissions:perms, protected:false });
+  }
+  localStorage.setItem('rs_roles', JSON.stringify(rolesData));
+  closeRoleModal();
+  loadRoles();
+  showToast(editingRoleId ? 'Role updated' : 'Role created');
+}
+
+function deleteRole() {
+  if (!editingRoleId) return;
+  const role = rolesData.find(r => r.id === editingRoleId);
+  if (role && role.protected) { showToast('Cannot delete protected role', true); return; }
+  rolesData = rolesData.filter(r => r.id !== editingRoleId);
+  localStorage.setItem('rs_roles', JSON.stringify(rolesData));
+  closeRoleModal();
+  loadRoles();
+  showToast('Role deleted');
 }
 
 checkAuth();
