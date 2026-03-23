@@ -547,6 +547,8 @@ async function doLogin() {
     TOKEN = data.accessToken;
     ME = data.user;
     localStorage.setItem('rs_admin_token', TOKEN);
+    localStorage.setItem('rs_access_token', TOKEN);
+    if (data.refreshToken) localStorage.setItem('rs_refresh_token', data.refreshToken);
     bootAdmin();
   } catch (err) {
     errEl.textContent = err.message;
@@ -561,6 +563,29 @@ async function checkAuth() {
     if (!['admin','superadmin','moderator'].includes(ME.role)) return showLogin();
     bootAdmin();
   } catch {
+    // Token expired — try refresh
+    const refreshToken = localStorage.getItem('rs_refresh_token');
+    if (refreshToken) {
+      try {
+        const r = await fetch(API + '/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+        if (r.ok) {
+          const data = await r.json();
+          TOKEN = data.accessToken;
+          localStorage.setItem('rs_access_token', TOKEN);
+          localStorage.setItem('rs_admin_token', TOKEN);
+          if (data.refreshToken) localStorage.setItem('rs_refresh_token', data.refreshToken);
+          ME = data.user || await api('GET', '/auth/me');
+          if (['admin','superadmin','moderator'].includes(ME.role)) {
+            bootAdmin();
+            return;
+          }
+        }
+      } catch {}
+    }
     TOKEN = null;
     localStorage.removeItem('rs_admin_token');
     showLogin();
