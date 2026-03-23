@@ -1214,16 +1214,24 @@ const ALL_PERMISSIONS = [
   'support.tickets','support.respond'
 ];
 
+const DEFAULT_ROLES = [
+  { id:'member', name:'Member', label:'Member', color:'#8b949e', level:0, description:'Default role for all registered users. Can create posts and comments.', permissions:['post.create','post.edit.own','post.delete.own','comment.create','comment.delete.own'], protected:true },
+  { id:'verified', name:'Verified', label:'Verified', color:'#4ade80', level:1, description:'Verified researcher. Badge displayed on profile and posts.', permissions:['post.create','post.edit.own','post.delete.own','comment.create','comment.delete.own'], protected:true },
+  { id:'contributor', name:'Contributor', label:'Contributor', color:'#38bdf8', level:2, description:'Active contributor with publishing privileges and extended profile.', permissions:['post.create','post.edit.own','post.delete.own','post.feature','comment.create','comment.delete.own'], protected:true },
+  { id:'pro', name:'Pro', label:'Pro', color:'#818cf8', level:3, description:'Pro membership. Priority post approval, custom badge, ad-free experience.', permissions:['post.create','post.edit.own','post.delete.own','post.feature','comment.create','comment.delete.own'], protected:true },
+  { id:'premium', name:'Premium', label:'Premium', color:'#a78bfa', level:4, description:'Premium membership. Everything in Pro plus featured placement, priority support, exclusive channels.', permissions:['post.create','post.edit.own','post.delete.own','post.feature','comment.create','comment.delete.own'], protected:true },
+  { id:'content_creator', name:'Content Creator', label:'Creator', color:'#f472b6', level:3, description:'Approved content creator. Can publish articles and featured content.', permissions:['post.create','post.edit.own','post.delete.own','post.pin','post.feature','comment.create','comment.delete.own'], protected:true },
+  { id:'support', name:'Support', label:'Support', color:'#22d3ee', level:5, description:'Support team member. Can view and respond to user tickets.', permissions:['post.create','post.edit.own','comment.create','comment.delete.own','users.view','support.tickets','support.respond','admin.panel'], protected:true },
+  { id:'moderator', name:'Moderator', label:'Mod', color:'#fbbf24', level:6, description:'Can review flagged content, remove posts, warn and ban users.', permissions:['post.create','post.edit.own','post.edit.any','post.delete.own','post.delete.any','post.pin','post.approve','comment.create','comment.delete.own','comment.delete.any','mod.flag.review','mod.remove','mod.ban','mod.warn','users.view','admin.panel','admin.stats','support.tickets','support.respond'], protected:true },
+  { id:'admin', name:'Admin', label:'Admin', color:'#60a5fa', level:8, description:'Full administrative access. Can manage users, roles, settings, and all content.', permissions:ALL_PERMISSIONS.slice(), protected:true },
+  { id:'superadmin', name:'Super Admin', label:'Super Admin', color:'#f87171', level:10, description:'Unrestricted platform access. Cannot be modified or deleted.', permissions:ALL_PERMISSIONS.slice(), protected:true },
+];
 let rolesData = JSON.parse(localStorage.getItem('rs_roles') || '[]');
-if (!rolesData.length) {
-  rolesData = [
-    { id:'user', name:'User', label:'User', color:'#8b949e', level:0, description:'Default role for all registered users.', permissions:['post.create','post.edit.own','post.delete.own','comment.create','comment.delete.own'], protected:true },
-    { id:'moderator', name:'Moderator', label:'Mod', color:'#fbbf24', level:5, description:'Can review flagged content, remove posts, and warn/ban users.', permissions:['post.create','post.edit.own','post.edit.any','post.delete.own','post.delete.any','post.pin','post.approve','comment.create','comment.delete.own','comment.delete.any','mod.flag.review','mod.remove','mod.ban','mod.warn','users.view','admin.panel','admin.stats'], protected:true },
-    { id:'admin', name:'Admin', label:'Admin', color:'#60a5fa', level:8, description:'Full administrative access.', permissions:ALL_PERMISSIONS.slice(), protected:true },
-    { id:'superadmin', name:'Super Admin', label:'Super Admin', color:'#f87171', level:10, description:'Unrestricted access. Cannot be modified.', permissions:ALL_PERMISSIONS.slice(), protected:true },
-  ];
-  localStorage.setItem('rs_roles', JSON.stringify(rolesData));
-}
+// Always ensure default roles exist
+DEFAULT_ROLES.forEach(dr => {
+  if (!rolesData.find(r => r.id === dr.id)) rolesData.push(dr);
+});
+localStorage.setItem('rs_roles', JSON.stringify(rolesData));
 let editingRoleId = null;
 
 function loadRoles() {
