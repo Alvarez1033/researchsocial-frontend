@@ -505,7 +505,8 @@ canvas{max-height:220px;}
 
 <script>
 const API = '/api';
-let TOKEN = localStorage.getItem('rs_admin_token');
+let TOKEN = localStorage.getItem('rs_admin_token') || localStorage.getItem('rs_access_token');
+let REFRESH = localStorage.getItem('rs_refresh_token');
 let ME = null;
 let socket = null;
 let charts = {};
@@ -547,6 +548,8 @@ async function doLogin() {
     TOKEN = data.accessToken;
     ME = data.user;
     localStorage.setItem('rs_admin_token', TOKEN);
+    localStorage.setItem('rs_access_token', TOKEN);
+    if (data.refreshToken) { REFRESH = data.refreshToken; localStorage.setItem('rs_refresh_token', REFRESH); }
     bootAdmin();
   } catch (err) {
     errEl.textContent = err.message;
@@ -561,6 +564,12 @@ async function checkAuth() {
     if (!['admin','superadmin','moderator'].includes(ME.role)) return showLogin();
     bootAdmin();
   } catch {
+    if (REFRESH) {
+      try {
+        var r = await fetch(API + '/auth/refresh', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({refreshToken:REFRESH}) });
+        if (r.ok) { var d = await r.json(); TOKEN = d.accessToken; localStorage.setItem('rs_admin_token',TOKEN); localStorage.setItem('rs_access_token',TOKEN); if(d.refreshToken){REFRESH=d.refreshToken;localStorage.setItem('rs_refresh_token',REFRESH);} ME = d.user; if(['admin','superadmin','moderator'].includes(ME.role)){bootAdmin();return;} }
+      } catch(e){}
+    }
     TOKEN = null;
     localStorage.removeItem('rs_admin_token');
     showLogin();
@@ -574,9 +583,11 @@ function showLogin() {
 }
 
 function logout() {
-  TOKEN = null;
-  ME = null;
+  TOKEN = null; ME = null; REFRESH = null;
   localStorage.removeItem('rs_admin_token');
+  localStorage.removeItem('rs_access_token');
+  localStorage.removeItem('rs_refresh_token');
+  localStorage.removeItem('rs_user');
   if (socket) socket.disconnect();
   location.reload();
 }
