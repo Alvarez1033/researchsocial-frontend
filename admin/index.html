@@ -574,7 +574,8 @@ async function checkAuth() {
           localStorage.setItem('rs_admin_token', TOKEN);
           localStorage.setItem('rs_access_token', TOKEN);
           localStorage.setItem('rs_refresh_token', REFRESH_TOKEN);
-          ME = rd.user || await api('GET', '/auth/me');
+          ME = rd.user;
+          if (!ME || !ME.role) ME = await api('GET', '/auth/me');
           if (['admin','superadmin','moderator'].includes(ME.role)) { bootAdmin(); return; }
         }
       } catch(e) {}
